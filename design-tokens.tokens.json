@@ -145,7 +145,7 @@
     "key colors group": {
       "primary key color": {
         "type": "color",
-        "value": "#1e293bff",
+        "value": "#1e3a5fff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -158,9 +158,14 @@
           }
         }
       },
+      "primary dark key color": {
+        "type": "color",
+        "value": "#12283fff",
+        "blendMode": "normal"
+      },
       "secondary key color": {
         "type": "color",
-        "value": "#475569ff",
+        "value": "#c97b3dff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -175,7 +180,7 @@
       },
       "tetiary key color": {
         "type": "color",
-        "value": "#06b6d4ff",
+        "value": "#c97b3dff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -190,7 +195,7 @@
       },
       "neutral key color": {
         "type": "color",
-        "value": "#64748bff",
+        "value": "#1c1c1cff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -205,7 +210,7 @@
       },
       "neutral vriant color": {
         "type": "color",
-        "value": "#475569ff",
+        "value": "#6b6b6bff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -220,7 +225,7 @@
       },
       "error  key color": {
         "type": "color",
-        "value": "#ef4444ff",
+        "value": "#c0392bff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -235,18 +240,33 @@
       },
       "success key color": {
         "type": "color",
-        "value": "#10b981ff",
-        "blendMode": "normal",
-        "extensions": {
-          "org.lukasoppermann.figmaDesignTokens": {
-            "collection": "spacing and primitive colors",
-            "scopes": [
-              "ALL_SCOPES"
-            ],
-            "variableId": "VariableID:110:27",
-            "exportKey": "variables"
-          }
-        }
+        "value": "#2e7d4fff",
+        "blendMode": "normal"
+      },
+      "warning key color": {
+        "type": "color",
+        "value": "#d9a02bff",
+        "blendMode": "normal"
+      },
+      "info key color": {
+        "type": "color",
+        "value": "#3b7dadff",
+        "blendMode": "normal"
+      },
+      "background key color": {
+        "type": "color",
+        "value": "#faf7f2ff",
+        "blendMode": "normal"
+      },
+      "surface key color": {
+        "type": "color",
+        "value": "#ffffffff",
+        "blendMode": "normal"
+      },
+      "border key color": {
+        "type": "color",
+        "value": "#e5dfd6ff",
+        "blendMode": "normal"
       }
     },
     "primary color pallete": {
@@ -267,7 +287,7 @@
       },
       "primary10": {
         "type": "color",
-        "value": "#101c2dff",
+        "value": "#0a082bff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -282,7 +302,7 @@
       },
       "primary20": {
         "type": "color",
-        "value": "#263143ff",
+        "value": "#1e1980ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -297,7 +317,7 @@
       },
       "primary30": {
         "type": "color",
-        "value": "#3d475bff",
+        "value": "#322ad5ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -312,7 +332,7 @@
       },
       "primary40": {
         "type": "color",
-        "value": "#545f73ff",
+        "value": "#2821abff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -327,7 +347,7 @@
       },
       "primary50": {
         "type": "color",
-        "value": "#6d778dff",
+        "value": "#322ad5ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -342,7 +362,7 @@
       },
       "primary60": {
         "type": "color",
-        "value": "#8691a7ff",
+        "value": "#5b54deff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -357,7 +377,7 @@
       },
       "primary70": {
         "type": "color",
-        "value": "#a1abc2ff",
+        "value": "#847fe6ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -372,7 +392,7 @@
       },
       "primary80": {
         "type": "color",
-        "value": "#bcc7deff",
+        "value": "#adaaeeff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -387,7 +407,7 @@
       },
       "primary90": {
         "type": "color",
-        "value": "#d8e3fbff",
+        "value": "#d6d4f7ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -402,7 +422,7 @@
       },
       "primary95": {
         "type": "color",
-        "value": "#e6f1ffff",
+        "value": "#ebeafbff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -417,7 +437,7 @@
       },
       "primary98": {
         "type": "color",
-        "value": "#eefaffff",
+        "value": "#f7f6fdff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -432,7 +452,7 @@
       },
       "primary99": {
         "type": "color",
-        "value": "#f1fcffff",
+        "value": "#fbfbfeff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -479,7 +499,7 @@
       },
       "secondary10": {
         "type": "color",
-        "value": "#0d1c2dff",
+        "value": "#0a082bff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -494,7 +514,7 @@
       },
       "secondary20": {
         "type": "color",
-        "value": "#233144ff",
+        "value": "#141056ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -509,7 +529,7 @@
       },
       "secondary30": {
         "type": "color",
-        "value": "#3a485bff",
+        "value": "#1d1980ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -524,7 +544,7 @@
       },
       "secondary40": {
         "type": "color",
-        "value": "#515f74ff",
+        "value": "#2721abff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -539,7 +559,7 @@
       },
       "secondary50": {
         "type": "color",
-        "value": "#6a788dff",
+        "value": "#3129d6ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -554,7 +574,7 @@
       },
       "secondary60": {
         "type": "color",
-        "value": "#8392a8ff",
+        "value": "#5a54deff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -569,7 +589,7 @@
       },
       "secondary70": {
         "type": "color",
-        "value": "#9eacc3ff",
+        "value": "#837fe6ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -584,7 +604,7 @@
       },
       "secondary80": {
         "type": "color",
-        "value": "#b9c7dfff",
+        "value": "#ada9efff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -599,7 +619,7 @@
       },
       "secondary90": {
         "type": "color",
-        "value": "#d5e4fbff",
+        "value": "#d6d4f7ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -614,7 +634,7 @@
       },
       "secondary95": {
         "type": "color",
-        "value": "#e3f2ffff",
+        "value": "#eaeafbff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -629,7 +649,7 @@
       },
       "secondary98": {
         "type": "color",
-        "value": "#ebfaffff",
+        "value": "#f8f7fdff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -644,7 +664,7 @@
       },
       "secondary99": {
         "type": "color",
-        "value": "#eefdffff",
+        "value": "#fbfbfeff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -691,7 +711,7 @@
       },
       "tetiary10": {
         "type": "color",
-        "value": "#00263eff",
+        "value": "#0a082bff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -706,7 +726,7 @@
       },
       "tetiary20": {
         "type": "color",
-        "value": "#003c56ff",
+        "value": "#141056ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -721,7 +741,7 @@
       },
       "tetiary30": {
         "type": "color",
-        "value": "#00536eff",
+        "value": "#1d1980ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -736,7 +756,7 @@
       },
       "tetiary40": {
         "type": "color",
-        "value": "#006c88ff",
+        "value": "#2721abff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -751,7 +771,7 @@
       },
       "tetiary50": {
         "type": "color",
-        "value": "#0085a2ff",
+        "value": "#3129d6ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -766,7 +786,7 @@
       },
       "tetiary60": {
         "type": "color",
-        "value": "#00a0bdff",
+        "value": "#5a54deff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -781,7 +801,7 @@
       },
       "tetiary70": {
         "type": "color",
-        "value": "#1abbd9ff",
+        "value": "#837fe6ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -796,7 +816,7 @@
       },
       "tetiary80": {
         "type": "color",
-        "value": "#4cd7f6ff",
+        "value": "#ada9efff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -811,7 +831,7 @@
       },
       "tetiary90": {
         "type": "color",
-        "value": "#70f3ffff",
+        "value": "#d6d4f7ff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -826,7 +846,7 @@
       },
       "tetiary95": {
         "type": "color",
-        "value": "#80ffffff",
+        "value": "#eaeafbff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -841,7 +861,7 @@
       },
       "tetiary98": {
         "type": "color",
-        "value": "#8affffff",
+        "value": "#f7f6fdff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -856,7 +876,7 @@
       },
       "tetiary99": {
         "type": "color",
-        "value": "#8dffffff",
+        "value": "#fbfbfeff",
         "blendMode": "normal",
         "extensions": {
           "org.lukasoppermann.figmaDesignTokens": {
@@ -1524,7 +1544,7 @@
   },
   "color roles": {
     "primary": {
-      "description": "",
+      "description": "Headers, primary buttons, nav",
       "type": "color",
       "value": "{spacing and primitive colors.key colors group.primary key color}",
       "extensions": {
@@ -1538,10 +1558,15 @@
         }
       }
     },
-    "on primary": {
-      "description": "",
+    "primary dark": {
+      "description": "Pressed states, active nav",
       "type": "color",
-      "value": "{spacing and primitive colors.primary color pallete.primary100}",
+      "value": "{spacing and primitive colors.key colors group.primary dark key color}"
+    },
+    "on primary": {
+      "description": "Text on navy backgrounds",
+      "type": "color",
+      "value": "#ffffffff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1556,7 +1581,7 @@
     "primary container": {
       "description": "",
       "type": "color",
-      "value": "{spacing and primitive colors.primary color pallete.primary90}",
+      "value": "#e8eef5ff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1571,7 +1596,7 @@
     "on primary container": {
       "description": "",
       "type": "color",
-      "value": "{spacing and primitive colors.primary color pallete.primary30}",
+      "value": "#12283fff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1584,9 +1609,9 @@
       }
     },
     "secondary": {
-      "description": "",
+      "description": "CTAs, highlights, badges",
       "type": "color",
-      "value": "{spacing and primitive colors.secondary color pallete.secondary40}",
+      "value": "{spacing and primitive colors.key colors group.secondary key color}",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1599,9 +1624,9 @@
       }
     },
     "on secondary": {
-      "description": "",
+      "description": "Text on ochre backgrounds",
       "type": "color",
-      "value": "{spacing and primitive colors.secondary color pallete.secondary100}",
+      "value": "#1c1c1cff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1616,7 +1641,7 @@
     "secondary container": {
       "description": "",
       "type": "color",
-      "value": "{spacing and primitive colors.secondary color pallete.secondary90}",
+      "value": "#f9efe6ff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1631,7 +1656,7 @@
     "on secondary container": {
       "description": "",
       "type": "color",
-      "value": "{spacing and primitive colors.secondary color pallete.secondary30}",
+      "value": "#804b1eff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1644,9 +1669,9 @@
       }
     },
     "tetiary": {
-      "description": "",
+      "description": "CTAs, highlights, badges",
       "type": "color",
-      "value": "{spacing and primitive colors.tetiary color pallete.tetiary40}",
+      "value": "{spacing and primitive colors.key colors group.tetiary key color}",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1659,9 +1684,9 @@
       }
     },
     "on tetiary": {
-      "description": "",
+      "description": "Text on ochre backgrounds",
       "type": "color",
-      "value": "{spacing and primitive colors.tetiary color pallete.tetiary100}",
+      "value": "#1c1c1cff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1676,7 +1701,7 @@
     "tetiary container": {
       "description": "",
       "type": "color",
-      "value": "{spacing and primitive colors.tetiary color pallete.tetiary90}",
+      "value": "#f9efe6ff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1691,7 +1716,7 @@
     "on tetiary container": {
       "description": "",
       "type": "color",
-      "value": "{spacing and primitive colors.tetiary color pallete.tetiary30}",
+      "value": "#804b1eff",
       "extensions": {
         "org.lukasoppermann.figmaDesignTokens": {
           "collection": "Color roles",
@@ -1702,6 +1727,66 @@
           "exportKey": "variables"
         }
       }
+    },
+    "background": {
+      "description": "App background",
+      "type": "color",
+      "value": "#faf7f2ff"
+    },
+    "surface": {
+      "description": "Cards, modals",
+      "type": "color",
+      "value": "#ffffffff"
+    },
+    "border": {
+      "description": "Card borders, dividers",
+      "type": "color",
+      "value": "#e5dfd6ff"
+    },
+    "divider": {
+      "description": "Card borders, dividers",
+      "type": "color",
+      "value": "#e5dfd6ff"
+    },
+    "success": {
+      "description": "Payment confirmed, on budget",
+      "type": "color",
+      "value": "#2e7d4fff"
+    },
+    "warning": {
+      "description": "Approaching budget limit, due soon",
+      "type": "color",
+      "value": "#d9a02bff"
+    },
+    "danger": {
+      "description": "Overdue payment, over budget",
+      "type": "color",
+      "value": "#c0392bff"
+    },
+    "info": {
+      "description": "Neutral notices, reminders",
+      "type": "color",
+      "value": "#3b7dadff"
+    },
+    "text primary": {
+      "description": "Body copy, headings",
+      "type": "color",
+      "value": "#1c1c1cff"
+    },
+    "text secondary": {
+      "description": "Captions, metadata",
+      "type": "color",
+      "value": "#6b6b6bff"
+    },
+    "text on primary": {
+      "description": "Text on navy backgrounds",
+      "type": "color",
+      "value": "#ffffffff"
+    },
+    "text on accent": {
+      "description": "Text on ochre backgrounds",
+      "type": "color",
+      "value": "#1c1c1cff"
     }
   },
   "typography": {

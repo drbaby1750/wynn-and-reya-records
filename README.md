@@ -1,8 +1,8 @@
-# Wynn & Reya Shipping Container Verification System
+# Wynn & Reya Records
 
-A high-performance container document verification system built with **Next.js 14, Drizzle ORM, SQLite, and Google Gemini 3.6 Flash**. 
+A secure, high-performance records management system built with **Next.js 14, Drizzle ORM, and SQLite**.
 
-Automates multimodal container code extraction from shipping document photos and PDFs, performs deterministic ISO 6346 check-digit verification, and manages background processing via a database-backed worker queue.
+**Assessment 4 — Records and Access Slice**: Demonstrates authenticated record creation, ownership-scoped listing, authorized detail viewing, and atomic soft/hard deletion with audit logging.
 
 ---
 
@@ -22,53 +22,35 @@ Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-Ensure your `.env` contains a valid `GEMINI_API_KEY`:
+Ensure your `.env` contains:
 ```env
 DATABASE_URL="file:./sqlite.db"
-AUTH_SECRET="dev-secret-wynn-reya-containers-verification-key-123456789"
-GEMINI_API_KEY="your_google_gemini_api_key_here"
-AI_PROVIDER="google"
-AI_MODEL="gemini-3.6-flash"
-
-AI_REQUEST_TIMEOUT_MS=30000
-AI_MAX_OUTPUT_TOKENS=2048
-AI_TEMPERATURE=0.2
-
-MAX_AI_CONCURRENCY=3
-AI_PROCESSING_RATE_LIMIT_MAX=10
-AI_PROCESSING_RATE_LIMIT_WINDOW_MS=60000
-AI_FOLLOWUP_RATE_LIMIT_MAX=5
-AI_FOLLOWUP_RATE_LIMIT_WINDOW_MS=60000
-
-MAX_UPLOAD_SIZE_BYTES=10485760
-UPLOAD_STORAGE_DIR="./storage/uploads"
+AUTH_SECRET="dev-secret-wynn-reya-records-key-123456789"
 ```
 
-### 4. Database Initialization
+### 4. Database Setup
 ```bash
 npx drizzle-kit push
 ```
 
-### 5. Running the Application & Background Worker
-Start the Next.js server (which hosts the application and background worker queue):
+### 5. Running the Application
+Start the Next.js development server:
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser. Click **"Sign In"** to authenticate an inspector demo session and upload a container document image or PDF.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 6. Running Automated Tests
-Execute all 55 unit, integration, worker, and rate-limiting tests:
+Execute all records foundation, create, list, and detail tests:
 ```bash
 npm test
 ```
 
 ---
 
-## Technical Architecture Overview
+## Architecture Overview
 
-- **Multimodal AI Pipeline**: Stage 1 Container Number Extraction + Stage 2 ISO 6346 Verification.
-- **Asynchronous Background Processing**: Database-backed job queue with atomic job claiming (`claimNextJob`) to prevent race conditions.
-- **Concurrency & Rate Limiting**: Configurable worker concurrency cap (`MAX_AI_CONCURRENCY`) and server-side rate limiters (`processingRateLimiter`, `followupRateLimiter`).
-- **Domain-Focused Follow-up Action**: Operational logistics compliance query on completed results.
-
-Detailed engineering documentation is available in [DOCUMENTATION.md](./DOCUMENTATION.md).
+- **Authentication & Ownership Scoping**: Every record belongs to an authenticated user (`user_id`). Database queries strictly filter by `WHERE user_id = authenticatedUserId`.
+- **Public ID Security**: Records use random UUID public identifiers (`publicId`) in URLs and API contracts. Internal integer primary keys (`id`) are never leaked to clients.
+- **Data Access & Service Layer**: Encapsulated service methods in `src/lib/records/service.ts` for record creation, listing, detail lookup, and deletion transactions.
+- **Audit Logging**: Deletions atomically write an audit record to `deletion_audits`.

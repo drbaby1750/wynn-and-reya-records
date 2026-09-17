@@ -1,82 +1,66 @@
-# Wynn & Reya Container Verification System — AI Integration Engineering Documentation
-
-This document provides a comprehensive engineering breakdown of **Assessment 3: AI Integration Slice** for the Wynn & Reya Product Engineering Bootcamp project.
+# Wynn & Reya Records — Engineering Documentation
+## Assessment 4: Records and Access Slice
 
 ---
 
 # 1. What This Is
 
-### Domain & Purpose
-This slice implements an automated **Shipping Container Identification & Invoice Verification System** for Wynn & Reya logistics operations. 
+This project implements **Assessment 4: Records and Access Slice** for **Wynn & Reya Records**.
 
-In global supply chains, container numbers (ISO 6346 standard) on shipping documents, bills of lading, and photos are manually inspected to prevent logistics routing errors and customs entry delays. This engineering slice automates container extraction, structural format verification, check-digit validation, background queuing, rate limiting, and follow-up compliance queries.
+### Core Functionality
+- **Authenticated Record Creation:** Authenticated users can create new records with a validated title and optional description.
+- **Ownership-Scoped List & Detail View:** Users can view a list of records that belong exclusively to them, or inspect single record details via a safe public UUID identifier.
+- **Atomic Deletion & Audit Logging:** Users can delete their own records after confirming via a dedicated confirmation screen. The deletion and creation of an audit log snapshot occur within an atomic database transaction.
+- **Genuine Empty State:** Displays a custom, accessible empty state UI when a user has zero records.
 
-### What Is Intentionally Included
-- **Multimodal AI Extraction**: Extracts container identification numbers from uploaded shipping document photos (PNG, JPEG, WebP) and PDF invoices.
-- **Two-Stage AI & Algorithmic Verification**: Combines Google Gemini multimodal analysis with deterministic ISO 6346 check-digit calculations.
-- **Asynchronous Background Processing**: Database-backed job queue with atomic worker job claiming (`PENDING` &rarr; `PROCESSING` &rarr; `DONE` / `FAILED`).
-- **Concurrency & Rate Controls**: Configurable worker concurrency caps (`MAX_AI_CONCURRENCY`) and server-side rate limiters for processing and follow-up queries.
-- **Domain-Focused Follow-up Action**: Operational logistics compliance query on completed results.
-- **Robust Security & Privacy Boundary**: Server-enforced session authentication, user isolation, opaque file storage references, and private API credential management.
+### Core Access-Control Problem Demonstrated
+Preventing **Insecure Direct Object Reference (IDOR)** vulnerabilities by enforcing user ownership directly inside every database query (`WHERE user_id = authenticatedUserId AND public_id = targetPublicId`).
+
+### What Is Intentionally Excluded
+- Marketing and landing pages.
+- Public file storage or attachment uploading.
+- Multi-tenant record sharing or team roles.
+- Text search engines and filter panels.
+- Profile editing and social feeds.
 
 ---
 
 # 2. How To Run It
 
-### Prerequisites
-- Node.js (v18.x or higher)
-- npm (v9.x or higher)
-- Google Gemini API Key
+### 1. Prerequisites
+- **Node.js**: v18.x or higher
+- **npm**: v9.x or higher
 
-### Step 1: Installation
-Clone the repository and install dependencies:
+### 2. Installation
 ```bash
 npm install
 ```
 
-### Step 2: Environment Setup
+### 3. Environment Configuration
 Copy `.env.example` to `.env`:
 ```bash
 cp .env.example .env
 ```
-Configure your environment variables in `.env`:
+Ensure your `.env` contains:
 ```env
 DATABASE_URL="file:./sqlite.db"
-AUTH_SECRET="dev-secret-wynn-reya-containers-verification-key-123456789"
-GEMINI_API_KEY="your_actual_google_gemini_api_key_here"
-AI_PROVIDER="google"
-AI_MODEL="gemini-3.6-flash"
-
-AI_REQUEST_TIMEOUT_MS=30000
-AI_MAX_OUTPUT_TOKENS=2048
-AI_TEMPERATURE=0.2
-
-MAX_AI_CONCURRENCY=3
-AI_PROCESSING_RATE_LIMIT_MAX=10
-AI_PROCESSING_RATE_LIMIT_WINDOW_MS=60000
-AI_FOLLOWUP_RATE_LIMIT_MAX=5
-AI_FOLLOWUP_RATE_LIMIT_WINDOW_MS=60000
-
-MAX_UPLOAD_SIZE_BYTES=10485760
-UPLOAD_STORAGE_DIR="./storage/uploads"
+AUTH_SECRET="dev-secret-wynn-reya-records-key-123456789"
 ```
 
-### Step 3: Database Setup
-Apply Drizzle database migrations:
+### 4. Database Setup & Initialization
 ```bash
 npx drizzle-kit push
 ```
 
-### Step 4: Run Application & Background Worker
-Start the Next.js development server (which runs the web application and background worker queue):
+### 5. Running Development Server
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser. Click **"Sign In"** to initialize a authenticated inspector demo session.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Step 5: Run Automated Test Suite
-Run all 55 unit, integration, worker, and rate-limit tests:
+### 6. Test Suite & Typecheck
 ```bash
+npm run typecheck
 npm test
 ```
 
@@ -84,223 +68,199 @@ npm test
 
 # 3. The Flow, Step By Step
 
-### The Happy Path
-1. **User Uploads File**: Inspector selects a container image (PNG, JPEG, WebP) or shipping PDF document up to 10MB in the web UI.
-2. **Server-Side Validation**: `POST /api/upload` enforces session authentication, validates magic bytes, mime type, and file size boundaries.
-3. **Secure File Storage**: `storageService` writes the file to disk using an opaque UUID storage key (`storage/uploads/<uuid>`).
-4. **Job Creation**: Server creates an `ai_jobs` record in `pending` state with `attempt_count = 0` and storage reference.
-5. **Non-Blocking Client Response**: `POST /api/upload` immediately returns HTTP `201 Created` with job details. The browser request does not block waiting for AI.
-6. **Background Worker Claiming**: `BackgroundWorker.claimNextJob()` atomically updates the job state `PENDING` &rarr; `PROCESSING` guarded by `WHERE status = 'pending'` in FIFO order (`created_at ASC`).
-7. **AI Extraction & Verification**: 
-   - **Stage 1**: `extractContainerNumber()` sends image buffer to Gemini 3.6 Flash using `CONTAINER_EXTRACTION_PROMPT`.
-   - **Deterministic Guard**: Calculates ISO 6346 check-digit algorithmically in Node.js code.
-   - **Stage 2**: `verifyContainer()` calls Gemini 3.6 Flash with `CONTAINER_VERIFICATION_PROMPT` and deterministic checksum context.
-8. **Structured Output Validation**: `ExtractionOutputSchema` and `VerificationOutputSchema` validate response structure.
-9. **Result Persistence**: Worker persists validated JSON result, sets `extracted_number`, updates `status = 'done'`, and records `completed_at`.
-10. **UI Observation**: Frontend polls `GET /api/jobs/[id]` and displays completed verification badge, extracted container number, and confidence breakdown.
-11. **Follow-up Compliance Query**: User submits a logistics compliance question. Server enforces user ownership, completed job guard, rate limiter, executes `CONTAINER_FOLLOWUP_PROMPT`, validates JSON output via `FollowupOutputSchema`, and displays suggestions.
+### Authorized Flow (User A)
+1. **Authentication:** User A signs in or authenticates a demo session (`POST /api/auth/demo-session`). The server sets an HTTP cookie containing the session ID.
+2. **Records List Navigation:** User A opens `/records`. The server reads the session cookie, resolves User A's identity, and queries `SELECT * FROM records WHERE user_id = 'userA_id' ORDER BY created_at DESC`.
+3. **Genuine Empty State:** If User A has 0 records, the UI renders the genuine empty state ("No records yet").
+4. **Create Record:** User A fills out the form at `/records/new`. The server validates input using Zod (`createRecordSchema`) and inserts the record with `user_id = 'userA_id'` and a server-generated random `public_id` UUID.
+5. **List Updated:** User A is redirected to `/records` or `/records/[publicId]`. The new record appears in User A's list.
+6. **Detail View:** User A opens `/records/[publicId]`. The server executes `SELECT * FROM records WHERE user_id = 'userA_id' AND public_id = 'publicId'`. The record details render cleanly.
+7. **Delete Confirmation:** User A clicks "Delete Record" and is routed to `/records/[publicId]/delete`. The UI displays record details and a warning prompt.
+8. **Atomic Deletion:** User A clicks "Yes, Delete Record". The server executes `DELETE FROM records WHERE user_id = 'userA_id' AND public_id = 'publicId' RETURNING *` and inserts a snapshot into `deletion_audits` inside a single atomic SQLite transaction.
+9. **Redirect & Verification:** User A is redirected to `/records`. The record is gone. Direct access to `/records/[publicId]` returns a uniform `404 Not Found` response. The audit log retains the deletion entry.
 
-### The Failure & Retry Path
-1. **Transient Provider Error / Validation Failure**: If Gemini returns malformed output or experiences a 503 spike, `aiService.executeWithRetry()` catches the error, injects schema feedback or waits 1s exponential backoff, and retries.
-2. **Attempt Counting**: `attempt_count` increments exactly once per actual AI call.
-3. **Exhausted Attempts / Permanent Error**: If `attempt_count >= maxAiAttempts` or non-retryable error occurs, job status becomes `failed` with safe error logging.
+### Unauthorized Cross-User Flow (User B -> Record A)
+1. User B signs in and obtains a valid session cookie.
+2. User B attempts to access `GET /api/records/[recordAPublicId]` or `DELETE /api/records/[recordAPublicId]`.
+3. The server executes `WHERE user_id = 'userB_id' AND public_id = 'recordAPublicId'`.
+4. The database query yields 0 rows. The server throws `RecordNotFoundError` and returns `404 Not Found` (`{ error: "Record not found." }`).
+5. **Security Result:** Record A is NOT exposed, Record A is NOT deleted, and 0 audit logs are created for User B.
 
 ---
 
 # 4. The Data Model
 
-The application uses SQLite with Drizzle ORM consisting of 4 core tables:
-
 ### 1. `users`
-- **Fields**: `id` (text, PK), `email` (text, unique), `hashedPassword` (text), `isVerified` (boolean), `createdAt` (timestamp).
-- **Purpose**: Authenticated inspector identity for user isolation.
+- `id` (TEXT PK): Internal user UUID.
+- `email` (TEXT UNIQUE NOT NULL): User email address.
+- `hashed_password` (TEXT NOT NULL): Hashed authentication secret.
+- `is_verified` (INTEGER NOT NULL): Account verification status flag.
+- `created_at` (INTEGER NOT NULL): Account creation timestamp.
 
 ### 2. `sessions`
-- **Fields**: `id` (text, PK), `userId` (text, FK &rarr; users.id), `expiresAt` (timestamp).
-- **Purpose**: Server-side authenticated session tracking.
+- `id` (TEXT PK): Random session token string.
+- `user_id` (TEXT FK -> `users.id` ON DELETE CASCADE): Foreign key referencing the session owner.
+- `expires_at` (INTEGER NOT NULL): Session expiration timestamp.
 
-### 3. `uploaded_files`
-- **Fields**: `id` (text, PK), `userId` (text, FK), `originalName` (text), `mimeType` (text), `sizeBytes` (integer), `storageKey` (text), `createdAt` (timestamp).
-- **Purpose**: Metadata registry for uploaded documents. Stores opaque `storageKey` file reference.
+### 3. `records`
+- `id` (INTEGER PK AUTOINCREMENT): Internal SQLite sequential primary key (never exposed over API/UI).
+- `public_id` (TEXT UNIQUE NOT NULL): Safe random UUID public identifier used in URLs and API parameters.
+- `user_id` (TEXT FK -> `users.id` ON DELETE CASCADE): Owner user ID.
+- `title` (TEXT NOT NULL): Record title (1-200 characters).
+- `description` (TEXT): Optional record context notes (0-1000 characters).
+- `status` (TEXT NOT NULL DEFAULT 'active'): Record status.
+- `created_at` (INTEGER NOT NULL): Record creation timestamp.
+- `updated_at` (INTEGER NOT NULL): Record last updated timestamp.
+- **Indexes:**
+  - `records_user_public_idx` on `(user_id, public_id)`
+  - `records_user_created_idx` on `(user_id, created_at)`
 
-### 4. `ai_jobs`
-- **Fields**: 
-  - `id` (text, PK)
-  - `userId` (text, FK)
-  - `jobType` (text) — e.g. `'CONTAINER_VERIFICATION'`
-  - `status` (text) — `'pending' | 'processing' | 'done' | 'failed'`
-  - `attemptCount` (integer, default 0)
-  - `storageKey` (text) — Opaque reference key to stored file
-  - `aiRole` (text) — `'CONTAINER_VERIFICATION'`
-  - `extractedNumber` (text, nullable)
-  - `resultJson` (text, nullable) — Validated JSON result string
-  - `errorMessage` (text, nullable) — Safe internal error message
-  - `createdAt` (timestamp)
-  - `startedAt` (timestamp, nullable)
-  - `completedAt` (timestamp, nullable)
+### 4. `deletion_audits`
+- `id` (INTEGER PK AUTOINCREMENT): Internal sequential primary key.
+- `public_id` (TEXT UNIQUE NOT NULL): Audit entry UUID.
+- `record_public_id` (TEXT NOT NULL): Public UUID snapshot of the deleted record.
+- `record_title` (TEXT NOT NULL): Title snapshot of the deleted record.
+- `deleted_by_user_id` (TEXT FK -> `users.id` ON DELETE CASCADE): User ID of the actor who executed deletion.
+- `action` (TEXT NOT NULL DEFAULT 'RECORD_DELETED'): Action identifier.
+- `deleted_at` (INTEGER NOT NULL): Deletion timestamp.
+- **Indexes:**
+  - `deletion_audits_user_deleted_idx` on `(deleted_by_user_id, deleted_at)`
 
-### Why Binary Files Are NOT Stored in the Database
-Binary files (images/PDFs) are stored on disk in disk storage abstraction (`/storage/uploads/<uuid>`) while the database only stores the opaque `storageKey` string.
-- **Database Scalability**: Storing binary blobs in database rows causes database bloat, slows query indexes, and degrades backup performance.
-- **Security Isolation**: Keeping binary blobs out of database backups prevents unintentional exposure of file contents.
+### Audit Retention Strategy
+`deletion_audits` stores `record_public_id` and `record_title` as independent string columns. It does NOT use a foreign key referencing `records.id`. When a record is deleted from the `records` table, the audit entry in `deletion_audits` remains intact permanently.
 
 ---
 
 # 5. The Concepts
 
-### 1. AI Endpoint / Provider Integration
-1. **What is it?**: The integration layer connecting the application to AI model providers.
-2. **Why is it needed?**: To execute multimodal container code extraction and structural analysis.
-3. **How did I implement it?**: Created an isolated `AiService` class (`src/lib/ai/service.ts`) wrapping `@google/generative-ai`.
-4. **What did I choose against and why?**: Chose Google Gemini 3.6 Flash over OpenAI/DeepSeek because Gemini natively accepts multimodal PDF and image documents directly without requiring external OCR engines.
+### 1. Authentication vs Authorization
+- **What is it?** Authentication identifies *who* a user is (session validation). Authorization determines *what* an authenticated user is permitted to access (ownership scoping).
+- **Why is it needed?** Authenticating a user does not automatically prevent them from reading or deleting another user's private records.
+- **How did I implement it?** Authentication is handled by `getAuthenticatedUser()`, which resolves the session cookie. Authorization is enforced by appending `WHERE user_id = authenticatedUserId` directly to every database query.
+- **What did I choose against and why?** Rejected checking ownership in application code post-fetch, because fetching data before checking ownership risks leaking existence and causing race conditions.
 
-### 2. Official SDK vs Raw HTTP
-1. **What is it?**: Using Google's official `@google/generative-ai` SDK vs raw `fetch()` calls.
-2. **Why is it needed?**: The official SDK handles tokenization, streaming, file part formatting, and type definitions cleanly.
-3. **How did I implement it?**: Initialized `GoogleGenerativeAI(config.geminiApiKey)` inside `AiService`.
-4. **What did I choose against and why?**: Rejected manual `fetch()` calls to raw REST endpoints to avoid manual multipart encoding bugs and endpoint URL maintenance.
+### 2. Query Scoping
+- **What is it?** Including ownership conditions (`user_id = ?`) inside the SQL `WHERE` clause.
+- **Why is it needed?** Ensures the database engine itself filters unauthorized rows before data is returned to application memory.
+- **How did I implement it?** Used Drizzle ORM `and(eq(records.userId, userId), eq(records.publicId, publicId))` across service methods.
+- **What did I choose against and why?** Rejected executing `db.select().where(eq(records.publicId, id))` followed by `if (record.userId !== user.id)` in JS, because post-fetch filtering is vulnerable to timing attacks and memory leaks.
 
-### 3. System Prompts
-1. **What is it?**: Explicit instructions defined by the application developer that govern model behavior.
-2. **Why is it needed?**: Ensures the model adheres strictly to extraction formats and safety rules without claiming official authority.
-3. **How did I implement it?**: Defined `CONTAINER_EXTRACTION_PROMPT`, `CONTAINER_VERIFICATION_PROMPT`, and `CONTAINER_FOLLOWUP_PROMPT` in `src/lib/ai/prompts.ts` passed via `systemInstruction`.
-4. **What did I choose against and why?**: Rejected concatenating system prompts with user input in a single text string to prevent prompt injection attacks.
+### 3. IDOR (Insecure Direct Object Reference)
+- **What is it?** A vulnerability where an attacker manipulates a record identifier in a URL or API call to access unauthorized resources.
+- **Why is it needed?** Attackers frequently alter IDs in requests (`/api/records/rec-123` -> `/api/records/rec-124`).
+- **How did I implement it?** Combined non-sequential UUID public IDs with strict SQL ownership filtering.
+- **What did I choose against and why?** Rejected returning `403 Forbidden` messages like "Record belongs to another user", choosing instead a uniform `404 Not Found` to conceal record existence.
 
-### 4. User / File Input
-1. **What is it?**: The document image or text query provided by the user.
-2. **Why is it needed?**: Serves as the raw payload for container code extraction and verification.
-3. **How did I implement it?**: Passed file buffers as base64 inline data parts (`inlineData`) to Gemini multimodal endpoints.
-4. **What did I choose against and why?**: Rejected passing local server file paths to Gemini; inline base64 buffers isolate file access safely.
+### 4. Public / Opaque Identifiers
+- **What is it?** Using random UUID v4 strings (`publicId`) for external exposure while keeping sequential integer primary keys (`id`) internal.
+- **Why is it needed?** Sequential IDs (1, 2, 3...) allow attackers to enumerate total record counts and guess valid resource endpoints.
+- **How did I implement it?** Generated `randomUUID()` on record creation; exposed only `publicId` in URLs and JSON responses.
+- **What did I choose against and why?** Rejected exposing internal auto-increment primary keys to clients.
 
-### 5. Model Parameters
-1. **What is it?**: Configuration controls governing model output randomness, token limits, and timeouts.
-2. **Why is it needed?**: Ensures deterministic, fast, cost-controlled responses.
-3. **How did I implement it?**: Configured `temperature: 0.2`, `maxOutputTokens: 2048`, and `requestTimeoutMs: 30000` via `getAiConfig()`.
-4. **What did I choose against and why?**: Rejected high temperatures (e.g. 0.9) to prevent hallucinated container numbers.
+### 5. Ownership
+- **What is it?** Establishing a strict binding between a record and its creator (`userId`).
+- **Why is it needed?** Defines data boundaries in multi-user applications.
+- **How did I implement it?** Derived `userId` exclusively from the authenticated session token; rejected client-submitted user IDs.
+- **What did I choose against and why?** Rejected trusting client body parameters like `{ userId: "user_abc" }`.
 
-### 6. Structured Output
-1. **What is it?**: Enforcing JSON formatted output responses from AI models.
-2. **Why is it needed?**: Enables application code to programmatically parse and store extraction fields.
-3. **How did I implement it?**: Used `generationConfig: { responseMimeType: 'application/json' }`.
-4. **What did I choose against and why?**: Rejected unstructured plain text responses which require fragile regex parsing.
+### 6. Database Constraints & Foreign Keys
+- **What is it?** Schema-level rules enforcing column nullability, unique values, and relational referential integrity.
+- **Why is it needed?** Prevents orphan records, corrupt data states, and invalid user assignments.
+- **How did I implement it?** Defined `notNull()`, `unique()`, and `references(() => users.id, { onDelete: 'cascade' })` in schema.
+- **What did I choose against and why?** Rejected relying solely on application-level validation for data integrity.
 
-### 7. Schema Validation
-1. **What is it?**: Runtime verification of AI output structure using application validation schemas.
-2. **Why is it needed?**: AI models can occasionally emit missing or out-of-bound fields.
-3. **How did I implement it?**: Defined Zod schemas (`ExtractionOutputSchema`, `VerificationOutputSchema`, `FollowupOutputSchema`) in `src/lib/ai/schema.ts` and called `.parse(json)`.
-4. **What did I choose against and why?**: Rejected trusting raw AI output directly without runtime validation.
+### 7. Audit Logging
+- **What is it?** Creating an immutable record of sensitive system actions (e.g., record deletions).
+- **Why is it needed?** Provides accountability, compliance tracking, and security auditing.
+- **How did I implement it?** Created `deletion_audits` table storing snapshot details (`recordPublicId`, `recordTitle`, `deletedByUserId`, `deletedAt`).
+- **What did I choose against and why?** Rejected soft-deleting records in the main table without a dedicated audit trail.
 
-### 8. Retry Logic
-1. **What is it?**: Automatic re-execution of AI operations when transient errors occur.
-2. **Why is it needed?**: Recovers from temporary network hiccups, 503 provider spikes, or schema validation failures.
-3. **How did I implement it?**: Built `executeWithRetry()` loop in `AiService` with feedback injection for validation errors and 1s exponential backoff for 503 errors.
-4. **What did I choose against and why?**: Rejected infinite retries; capped retries to `maxAiAttempts` (3).
+### 8. Database Transactions
+- **What is it?** Wrapping multiple database operations in an all-or-nothing execution block.
+- **Why is it needed?** Ensures database consistency if an error occurs mid-operation.
+- **How did I implement it?** Used `db.transaction((tx) => ...)` to combine record deletion and audit log creation.
+- **What did I choose against and why?** Rejected executing delete and audit log queries in separate un-transactioned statements.
 
-### 9. Background Jobs
-1. **What is it?**: Decoupling long-running tasks from synchronous HTTP web request threads.
-2. **Why is it needed?**: Prevents browser timeout and keeps upload endpoints fast (~50ms response).
-3. **How did I implement it?**: `POST /api/upload` inserts job record with status `pending` and returns HTTP 201 immediately.
-4. **What did I choose against and why?**: Rejected synchronous processing during upload request.
+### 9. Page Architecture
+- **What is it?** Structure of Next.js App Router pages (`/records`, `/records/new`, `/records/[id]`, `/records/[id]/delete`).
+- **Why is it needed?** Provides intuitive navigation, shallow state transitions, and accessible user flows.
+- **How did I implement it?** Built clean React client pages with structured CSS token styling.
+- **What did I choose against and why?** Rejected single-page modal overlays for deletion in favor of explicit confirmation URLs.
 
-### 10. Workers
-1. **What is it?**: Dedicated background execution process that processes queued jobs.
-2. **Why is it needed?**: Executes AI operations asynchronously outside web request lifecycles.
-3. **How did I implement it?**: Built `BackgroundWorker` in `src/lib/ai/worker.ts`.
-4. **What did I choose against and why?**: Rejected client-side worker execution; server worker ensures security and API key privacy.
+### 10. URL State
+- **What is it?** Reflecting resource state and location directly in browser address bars.
+- **Why is it needed?** Enables bookmarking, direct navigation, page refreshes, and standard browser back/forward controls.
+- **How did I implement it?** Mapped records to public UUID routes (`/records/[publicId]`).
+- **What did I choose against and why?** Rejected storing active record IDs purely in transient React component state.
 
-### 11. Queues
-1. **What is it?**: Persistent backlog of pending jobs awaiting execution.
-2. **Why is it needed?**: Handles traffic surges gracefully without overloading AI model quotas.
-3. **How did I implement it?**: Database-backed queue on `ai_jobs` table managed by `AiQueueManager`.
-4. **What did I choose against and why?**: Rejected complex external message brokers (RabbitMQ/Redis) to avoid unnecessary infrastructure bloat for this SQLite stack.
+### 11. 401 vs 403 vs 404
+- **What is it?** HTTP status code semantics for authentication and authorization failures.
+- **Why is it needed?** Communicates accurate error states without leaking sensitive system information.
+- **How did I implement it?**
+  - `401 Unauthorized`: Unauthenticated request.
+  - `404 Not Found`: Non-existent or unauthorized record.
+- **What did I choose against and why?** Rejected returning `403 Forbidden` for unauthorized record access to avoid revealing record existence.
 
-### 12. FIFO / Queue Behaviour
-1. **What is it?**: First-In-First-Out job processing order based on creation timestamp.
-2. **Why is it needed?**: Ensures fairness so earlier uploads are processed before newer ones.
-3. **How did I implement it?**: Worker queries pending jobs using `ORDER BY created_at ASC`.
-4. **What did I choose against and why?**: Rejected random or LIFO queue processing.
+### 12. Database Indexing
+- **What is it?** B-Tree data structures accelerating table search queries.
+- **Why is it needed?** Prevents full table scans on growing datasets.
+- **How did I implement it?** Added composite indexes on `(user_id, public_id)` and `(user_id, created_at)`.
+- **What did I choose against and why?** Rejected adding unnecessary single-column indexes on low-cardinality fields like `status`.
 
-### 13. Concurrency Limits
-1. **What is it?**: Capping the maximum number of simultaneous AI jobs processing at once.
-2. **Why is it needed?**: Prevents exceeding Google Gemini API rate limits and server memory limits.
-3. **How did I implement it?**: `BackgroundWorker` tracks `activeJobsCount` against `maxAiConcurrency` (3).
-4. **What did I choose against and why?**: Rejected uncapped parallel processing.
+### 13. Query-Count Measurement
+- **What is it?** Instrumenting the database adapter to count SQL statements executed per request.
+- **Why is it needed?** Provides empirical data to identify N+1 queries and unnecessary database round-trips.
+- **How did I implement it?** Built `startQueryCounter()` and `stopQueryCounter()` utilities in `src/lib/db/query-counter.ts`.
+- **What did I choose against and why?** Rejected guessing database performance based on subjective perception.
 
-### 14. Rate Limiting
-1. **What is it?**: Server-side throttling of request frequencies per authenticated user.
-2. **Why is it needed?**: Protects against API key quota exhaustion and cost abuse.
-3. **How did I implement it?**: Implemented `ServerRateLimiter` (`processingRateLimiter` = 10/min, `followupRateLimiter` = 5/min) returning HTTP 429.
-4. **What did I choose against and why?**: Rejected client-side button disabling as rate limiting; server-side enforcement cannot be bypassed.
+### 14. Query-Count Optimization
+- **What is it?** Refactoring database interaction code to reduce SQL statements per request.
+- **Why is it needed?** Reduces database CPU load, latency, and connection pool utilization.
+- **How did I implement it?** Replaced a 3-query delete transaction (select + insert audit + delete) with a 2-query transaction using `DELETE ... RETURNING *`.
+- **What did I choose against and why?** Rejected combining queries at the expense of authorization security or atomic transactions.
 
-### 15. Object / File Storage
-1. **What is it?**: Abstraction layer for storing and retrieving uploaded files.
-2. **Why is it needed?**: Safely isolates uploaded documents with opaque storage keys.
-3. **How did I implement it?**: Built `storageService` writing to `./storage/uploads/<uuid>`.
-4. **What did I choose against and why?**: Rejected using user-supplied filenames as disk storage paths to prevent path traversal attacks.
-
-### 16. Job States
-1. **What is it?**: Finite state machine transitions for AI jobs (`pending` &rarr; `processing` &rarr; `done` / `failed`).
-2. **Why is it needed?**: Provides deterministic lifecycle tracking for UI status and worker queueing.
-3. **How did I implement it?**: Enforced state transitions in `ai_jobs` status column with state guards in API routes.
-4. **What did I choose against and why?**: Rejected arbitrary client-controlled state mutations (e.g. client setting status directly to `done`).
-
-### 17. Error Handling
-1. **What is it?**: Structured handling of application errors and model failures.
-2. **Why is it needed?**: Prevents application crashes and protects secrets from leaking in stack traces.
-3. **How did I implement it?**: Custom `AiServiceError` class logging safe messages to DB while keeping raw API keys private.
-4. **What did I choose against and why?**: Rejected exposing internal raw exception messages to client responses.
-
-### 18. Timeout / Fallback
-1. **What is it?**: Aborting AI model requests that exceed maximum duration boundaries.
-2. **Why is it needed?**: Prevents worker threads from hanging indefinitely on stalled network sockets.
-3. **How did I implement it?**: `executeWithTimeout()` using `AbortController` set to 30,000ms.
-4. **What did I choose against and why?**: Rejected uncapped HTTP request waits.
-
-### 19. Cost Control
-1. **What is it?**: Combined defense-in-depth measures limiting financial exposure from model usage.
-2. **Why is it needed?**: Prevents unexpected API billing spikes.
-3. **How did I implement it?**: Enforced 10MB upload limit, 1000 char question limit, 2048 max output tokens, 3 max retries, 3 max concurrency, and non-recursive follow-up policy.
-4. **What did I choose against and why?**: Rejected unlimited token output configurations.
+### 15. Genuine Empty States
+- **What is it?** A dedicated UI state rendered when a user owns 0 records.
+- **Why is it needed?** Distinguishes between zero data and loading/error states, guiding new users to create their first record.
+- **How did I implement it?** Evaluated `records.length === 0` after fetch completion, displaying an icon, explanation, and CTA button.
+- **What did I choose against and why?** Rejected displaying empty white screens or fake demo placeholder items.
 
 ---
 
 # 6. What Went Wrong
 
-### Problem 1
-- **Symptom**: Model calls returned `404 Not Found` with message `This model models/gemini-2.5-flash is no longer available to new users. Please update your code to use models/gemini-3.6-flash`.
-- **Investigation**: Checked active Google Generative AI API endpoints using a standalone benchmark script (`test_gemini.mjs`). Tested `gemini-1.5-flash`, `gemini-1.5-pro`, `gemini-2.0-flash`, `gemini-2.5-flash`, and `gemini-3.6-flash`.
-- **Cause**: Google deprecated older model aliases on their v1beta API tier.
-- **Fix**: Updated `AI_MODEL` in `.env`, `.env.example`, and `config.ts` to `gemini-3.6-flash`, which responded instantly with `[OK] -> "Hello there, friend!"`.
+### Problem 1: Unnecessary Database Query in Delete Transaction
+- **Symptom:** The delete endpoint required 4 total database queries (1 auth lookup + 1 record select + 1 audit insert + 1 record delete).
+- **Investigation:** Inspected query counter output during `DELETE /api/records/[id]` execution.
+- **Cause:** `deleteRecordTransaction` performed a `tx.select()` lookup before executing `tx.delete()`.
+- **Fix:** Replaced the initial select query with `tx.delete(records).where(...).returning().get()`, capturing record snapshot data and executing deletion in a single query. Reduced query count from 4 to 3 (25% reduction).
 
-### Problem 2
-- **Symptom**: Initial background queue worker tests failed with `db.update(...).set(...).where(...).returning is not a function` when testing atomic job claiming.
-- **Investigation**: Reviewed SQLite Drizzle driver differences between native SQLite and test mock implementations.
-- **Cause**: `.returning()` helper behavior varies across mock adapters.
-- **Fix**: Updated `claimNextJob()` in `src/lib/ai/worker.ts` to perform an atomic `UPDATE ai_jobs SET status = 'processing' WHERE id = ? AND status = 'pending'`, followed by a deterministic re-query verifying status changed to `processing`.
+### Problem 2: Vitest Baseline Assertion Failure After Optimization
+- **Symptom:** `npm test` failed on `tests/records-foundation.test.ts` with `AssertionError: expected 2 to be greater than or equal to 3`.
+- **Investigation:** Checked Vitest log output.
+- **Cause:** The foundation test suite included an assertion expecting the unoptimized 3-query transaction baseline.
+- **Fix:** Updated the test assertion to `expect(deleteCount).toBeGreaterThanOrEqual(2)` to match the optimized 2-query transaction baseline.
 
-### Problem 3
-- **Symptom**: During initial model load testing, transient `503 Service Unavailable` errors occurred when calling Gemini API back-to-back.
-- **Investigation**: Inspected error stack traces and verified that immediate retries hit Google's server rate limiter.
-- **Cause**: Immediate retry loops without pause failed because Google's 503 spike lasted several milliseconds.
-- **Fix**: Added exponential backoff delay (`await new Promise(r => setTimeout(r, 1000 * attempt))`) inside `executeWithRetry()` in `src/lib/ai/service.ts`, allowing transient 503 spikes to resolve gracefully.
+### Problem 3: `better-sqlite3` Synchronous Transaction Constraint
+- **Symptom:** Runtime crash when attempting `await tx.transaction(async () => ...)` inside service layer.
+- **Investigation:** Reviewed `better-sqlite3` driver documentation and error stack trace.
+- **Cause:** `better-sqlite3` executes SQLite transactions synchronously and throws an exception if async promises are returned inside `db.transaction()`.
+- **Fix:** Refactored `deleteRecordTransaction` to use synchronous Drizzle methods (`.get()`, `.run()`) inside the transaction callback while returning a Promise from the outer wrapper function.
 
 ---
 
 # 7. What This Slice Does Not Handle
 
-This slice is intentionally scoped to Assessment 3 engineering requirements. It explicitly does NOT include:
-- Multi-user chat history or conversational thread persistence.
-- Full AI assistant or general-purpose chatbot capabilities.
-- Real-time WebSockets or Server-Sent Events (SSE) (polling is used).
-- External customs registry integrations (e.g. live BIC container database lookup).
-- Billing, subscription, or payment gateway integration.
-- Social sharing, notifications, or email alerts.
+- **Record Field Editing:** Updating existing record titles or descriptions.
+- **Permissions Delegation / Team Sharing:** Granting read or delete access to other users.
+- **Full-Text Search & Filtering:** Searching records by keyword or filtering by date ranges.
+- **Pagination & Infinite Scroll:** Chunking large record lists (>1000 items).
+- **Multimodal File Attachments:** Uploading PNG, JPEG, or PDF files to records.
 
 ---
 
 # 8. If I Built This Again
 
-If building this system for enterprise production scale:
-1. **Distributed Queue**: For multi-server deployments, I would migrate from SQLite to PostgreSQL with BullMQ / Redis to support distributed worker scaling across multiple cloud containers.
-2. **Deterministic Checksum First**: I would run the deterministic ISO 6346 check-digit algorithm before calling the Stage 2 LLM verification model, saving model tokens when format errors are obvious.
-3. **What I Would Keep**: The two-stage architecture (Stage 1 Multimodal Extraction + Stage 2 Verification) and Zod schema validation proved extremely clean, reliable, and easy to test.
+- **Session Caching:** Implement an in-memory Redis or LRU cache for `getAuthenticatedUser()` to reduce the 1-query session lookup overhead across all protected endpoints.
+- **Soft Deletion Option:** Add a configurable `deleted_at` timestamp column to `records` alongside hard deletion for recoverable record retention policies.
+- **Event Bus for Audit Logs:** Implement an asynchronous event bus or queue for audit log dispatch in high-throughput environments.

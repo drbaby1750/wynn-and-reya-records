@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Wynn & Reya - Container Verification System',
-  description: 'Secure Invoice and Container Tracking Number Verification Slice',
+  title: 'Wynn & Reya Records',
+  description: 'Secure Record Management and Access Control System',
 };
 
 export default function RootLayout({

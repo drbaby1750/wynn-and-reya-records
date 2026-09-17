@@ -21,31 +21,33 @@ sqlite.exec(`
     expires_at INTEGER NOT NULL
   );
 
-  CREATE TABLE IF NOT EXISTS uploaded_files (
-    id TEXT PRIMARY KEY,
+  CREATE TABLE IF NOT EXISTS records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    public_id TEXT NOT NULL UNIQUE,
     user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    original_name TEXT NOT NULL,
-    mime_type TEXT NOT NULL,
-    size_bytes INTEGER NOT NULL,
-    storage_key TEXT NOT NULL,
-    created_at INTEGER NOT NULL
+    title TEXT NOT NULL,
+    description TEXT,
+    status TEXT NOT NULL DEFAULT 'active',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
   );
 
-  CREATE TABLE IF NOT EXISTS ai_jobs (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    job_type TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',
-    attempt_count INTEGER NOT NULL DEFAULT 0,
-    storage_key TEXT,
-    ai_role TEXT NOT NULL,
-    extracted_number TEXT,
-    result_json TEXT,
-    error_message TEXT,
-    created_at INTEGER NOT NULL,
-    started_at INTEGER,
-    completed_at INTEGER
+  CREATE INDEX IF NOT EXISTS records_user_public_idx ON records(user_id, public_id);
+  CREATE INDEX IF NOT EXISTS records_user_created_idx ON records(user_id, created_at);
+
+  CREATE TABLE IF NOT EXISTS deletion_audits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    public_id TEXT NOT NULL UNIQUE,
+    record_public_id TEXT NOT NULL,
+    record_title TEXT NOT NULL,
+    deleted_by_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    action TEXT NOT NULL DEFAULT 'RECORD_DELETED',
+    deleted_at INTEGER NOT NULL
   );
+
+  CREATE INDEX IF NOT EXISTS deletion_audits_user_deleted_idx ON deletion_audits(deleted_by_user_id, deleted_at);
 `);
 
+export { sqlite };
 export const db = drizzle(sqlite, { schema });
+

@@ -1,7 +1,7 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 
 /**
- * 1. Existing Assessment 1 Auth Tables (Preserved strictly)
+ * 1. Assessment 1 Auth Tables (Preserved strictly)
  */
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
@@ -18,40 +18,41 @@ export const sessions = sqliteTable('sessions', {
 });
 
 /**
- * 2. Assessment 3 File Storage Metadata Model
+ * 2. Assessment 4 Records Domain Model (Wynn & Reya Records)
  */
-export const uploadedFiles = sqliteTable('uploaded_files', {
-  id: text('id').primaryKey(),
+export const records = sqliteTable('records', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  publicId: text('public_id').notNull().unique(), // Opaque random UUID/public identifier
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  originalName: text('original_name').notNull(),
-  mimeType: text('mime_type').notNull(),
-  sizeBytes: integer('size_bytes').notNull(),
-  storageKey: text('storage_key').notNull(), // Storage key reference (NOT binary file content)
+  title: text('title').notNull(),
+  description: text('description'),
+  status: text('status').notNull().default('active'),
   createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-});
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull(),
+}, (table) => ({
+  userPublicIdx: index('records_user_public_idx').on(table.userId, table.publicId),
+  userCreatedIdx: index('records_user_created_idx').on(table.userId, table.createdAt),
+}));
 
 /**
- * 3. Assessment 3 AI Job Processing Data Model
+ * 3. Assessment 4 Deletion Audit Log Model
  */
-export const aiJobs = sqliteTable('ai_jobs', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  jobType: text('job_type').notNull(), // 'container_verification' | 'container_followup'
-  status: text('status').notNull().default('pending'), // 'pending' | 'processing' | 'done' | 'failed'
-  attemptCount: integer('attempt_count').notNull().default(0),
-  storageKey: text('storage_key'), // File reference key in storage (NOT file binary blob)
-  aiRole: text('ai_role').notNull(), // 'CONTAINER_EXTRACTION' | 'CONTAINER_VERIFICATION'
-  extractedNumber: text('extracted_number'),
-  resultJson: text('result_json'), // Serialized validated ContainerVerificationResult
-  errorMessage: text('error_message'), // Safe internal error log
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull(),
-  startedAt: integer('started_at', { mode: 'timestamp' }),
-  completedAt: integer('completed_at', { mode: 'timestamp' }),
-});
+export const deletionAudits = sqliteTable('deletion_audits', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  publicId: text('public_id').notNull().unique(),
+  recordPublicId: text('record_public_id').notNull(),
+  recordTitle: text('record_title').notNull(),
+  deletedByUserId: text('deleted_by_user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  action: text('action').notNull().default('RECORD_DELETED'),
+  deletedAt: integer('deleted_at', { mode: 'timestamp' }).notNull(),
+}, (table) => ({
+  userDeletedIdx: index('deletion_audits_user_deleted_idx').on(table.deletedByUserId, table.deletedAt),
+}));
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-export type UploadedFile = typeof uploadedFiles.$inferSelect;
-export type NewUploadedFile = typeof uploadedFiles.$inferInsert;
-export type AiJob = typeof aiJobs.$inferSelect;
-export type NewAiJob = typeof aiJobs.$inferInsert;
+export type Session = typeof sessions.$inferSelect;
+export type RecordItem = typeof records.$inferSelect;
+export type NewRecordItem = typeof records.$inferInsert;
+export type DeletionAudit = typeof deletionAudits.$inferSelect;
+export type NewDeletionAudit = typeof deletionAudits.$inferInsert;
